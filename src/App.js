@@ -11,6 +11,8 @@ import { CommandTree, CommandViewEdit } from './components';
 import { command } from './redux/action';
 
 import styles from './App.styles';
+import ConfirmationModal from './components/ConfirmationModal';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const mapStateToProps = ({command: {commands, selectedCommand, errorMessage}}) => ({
   commands, selectedCommand, errorMessage,
@@ -24,10 +26,17 @@ const mapDispatchToProps = dispatch =>
       clearError: command.clearError.emit.create,
       updateCommand: command.update.emit.create,
       runCommand: command.run.emit.create,
+      deleteCommand: command.delete.emit.create,
     }, dispatch),
   });
 
 class App extends Component {
+  state = {
+    confirmation: {
+      open: false,
+    },
+  };
+
   constructor(props) {
     super(props);
 
@@ -40,11 +49,30 @@ class App extends Component {
     createCommand({isFolder, name});
   }
 
+  openConfirmation = (callback) => {
+    this.setState({confirmation: {open: true, callback: callback}});
+  };
+
+  closeConfirmation = () => {
+    this.setState({confirmation: {open: false}})
+  };
+
+  runCallback = () => {
+    this.state.confirmation.callback();
+    this.closeConfirmation();
+  };
+
+  removeFolder = () => {
+    const {actions: {deleteCommand}, selectedCommand} = this.props;
+    this.openConfirmation(()=> {deleteCommand(selectedCommand);});
+  };
+
   render() {
     const {
       classes, commands, selectedCommand, errorMessage,
-      actions: {selectCommand, clearError, updateCommand, runCommand},
+      actions: {selectCommand, clearError, updateCommand, runCommand, deleteCommand},
     } = this.props;
+    const {confirmation} = this.state;
     return (
       <Grid container className={ classes.root }>
         <Grid item xs={ 4 } className={ classes.leftPanel }>
@@ -63,13 +91,20 @@ class App extends Component {
                   <CloseIcon className={ classes.leftIcon }/>
                   Deselect
                 </Button>
+                <Button variant="contained" color="secondary" className={ classes.leftIcon }
+                        onClick={ this.removeFolder }>
+                  <DeleteIcon className={classes.iconButton} />
+                  Delete
+                </Button>
                 { selectedCommand.label }
               </div>
             ) : (
               <CommandViewEdit
                 command={ selectedCommand }
                 onUpdateCommand={ updateCommand }
-                onRunCommand={runCommand}
+                onRunCommand={ runCommand }
+                onDeleteCommand={ deleteCommand }
+                openConfirmation={ (callback) => {this.openConfirmation(callback)}}
               />
             )
           ) : 'No command selected' }
@@ -83,6 +118,13 @@ class App extends Component {
           autoHideDuration={ 6000 }
           onClose={ clearError }
           message={ errorMessage }
+        />
+        <ConfirmationModal
+          title={ `Remove ${selectedCommand && selectedCommand.label}?`}
+          text={ `Are you sure you want to remove ${selectedCommand && selectedCommand.label}?` }
+          open={ confirmation.open }
+          handleClose={ this.closeConfirmation }
+          handleConfirm={ this.runCallback }
         />
       </Grid>
     );
