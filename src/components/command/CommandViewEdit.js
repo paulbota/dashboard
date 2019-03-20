@@ -71,13 +71,8 @@ class CommandViewEdit extends Component {
     this.toggleEditState();
   };
 
-  deleteCommand = () => {
-    this.props.onDeleteCommand(this.state.commandToEdit);
-    this.toggleEditState();
-  };
-
   openConfirmation = () => {
-    this.props.openConfirmation(()=> {this.deleteCommand()});
+    this.props.openConfirmation();
   };
 
   handleCommandEdit = (fieldName) => (newValue) => {

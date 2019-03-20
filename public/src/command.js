@@ -31,7 +31,7 @@ const removeCommand = (command, commandId) => {
     parentCommand = parentCommand.children.find(x => x.label === command);
   });
   parentCommand.children = parentCommand.children.filter(x => x.label !== label);
-  return Object.assign( {id: parentFullPath}, parentCommand);
+  return {...parentCommand, id: parentFullPath};
 };
 
 const getCommand = (command, idUntilNow, commandId) => {
@@ -85,7 +85,7 @@ module.exports = {
   delete: async ({id}) => {
     const store = (await getStore());
 
-    const parent = removeCommand(store.commands,  `${ id }`);
+    const parent = removeCommand(store.commands,  id);
 
     await saveStore(store);
     return parent;

@@ -32,9 +32,18 @@ const mapDispatchToProps = dispatch =>
 
 class App extends Component {
   state = {
-    confirmation: {
-      open: false,
+    modalOpen: {
+      confirmation: false,
     },
+    modalData: {},
+  };
+
+  handleModalOpen = (modalType) => (modalData = {}) => {
+    this.setState(({ modalOpen }) => ({ modalOpen: { ...modalOpen, [modalType]: true }, modalData }));
+  };
+
+  handleModalClose = (modalType) => () => {
+    this.setState(({ modalOpen }) => ({ modalOpen: { ...modalOpen, [modalType]: false }, modalData: {} }));
   };
 
   constructor(props) {
@@ -49,22 +58,10 @@ class App extends Component {
     createCommand({isFolder, name});
   }
 
-  openConfirmation = (callback) => {
-    this.setState({confirmation: {open: true, callback: callback}});
-  };
-
-  closeConfirmation = () => {
-    this.setState({confirmation: {open: false}})
-  };
-
-  runCallback = () => {
-    this.state.confirmation.callback();
-    this.closeConfirmation();
-  };
-
-  removeFolder = () => {
+  deleteSelectedCommand = ()=> {
     const {actions: {deleteCommand}, selectedCommand} = this.props;
-    this.openConfirmation(()=> {deleteCommand(selectedCommand);});
+    deleteCommand(selectedCommand);
+    this.handleModalClose('confirmation')();
   };
 
   render() {
@@ -72,7 +69,7 @@ class App extends Component {
       classes, commands, selectedCommand, errorMessage,
       actions: {selectCommand, clearError, updateCommand, runCommand, deleteCommand},
     } = this.props;
-    const {confirmation} = this.state;
+    const { modalOpen } = this.state;
     return (
       <Grid container className={ classes.root }>
         <Grid item xs={ 4 } className={ classes.leftPanel }>
@@ -92,7 +89,7 @@ class App extends Component {
                   Deselect
                 </Button>
                 <Button variant="contained" color="secondary" className={ classes.leftIcon }
-                        onClick={ this.removeFolder }>
+                        onClick={ this.handleModalOpen('confirmation') }>
                   <DeleteIcon className={classes.iconButton} />
                   Delete
                 </Button>
@@ -104,7 +101,7 @@ class App extends Component {
                 onUpdateCommand={ updateCommand }
                 onRunCommand={ runCommand }
                 onDeleteCommand={ deleteCommand }
-                openConfirmation={ (callback) => {this.openConfirmation(callback)}}
+                openConfirmation={ this.handleModalOpen('confirmation') }
               />
             )
           ) : 'No command selected' }
@@ -122,9 +119,9 @@ class App extends Component {
         <ConfirmationModal
           title={ `Remove ${selectedCommand && selectedCommand.label}?`}
           text={ `Are you sure you want to remove ${selectedCommand && selectedCommand.label}?` }
-          open={ confirmation.open }
-          handleClose={ this.closeConfirmation }
-          handleConfirm={ this.runCallback }
+          open={ modalOpen.confirmation }
+          handleClose={ this.handleModalClose('confirmation') }
+          handleConfirm={ this.deleteSelectedCommand }
         />
       </Grid>
     );
