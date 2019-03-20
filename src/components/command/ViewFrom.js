@@ -33,7 +33,7 @@ class ViewForm extends Component {
             <Tab label="Logs"/>
             <Tab label="Settings"/>
           </Tabs>
-          { value === 0 && <div className={ classes.tabContainer }><StatusTab/></div> }
+          { value === 0 && <div className={ classes.tabContainer }><StatusTab commandId={ command.id }/></div> }
           { value === 1 && <div className={ classes.tabContainer }>Logs tab</div> }
           { value === 2 && <div className={ classes.tabContainer }>Settings tab</div> }
         </Paper>

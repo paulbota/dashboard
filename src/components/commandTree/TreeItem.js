@@ -3,10 +3,16 @@ import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 
 import styles from './TreeItem.styles';
+import StatusLight from '../statusLight/StatusLight';
+import {connect} from 'react-redux';
+
+const mapStateToProps = ({command: {status}}) => ({
+  status
+});
 
 class TreeItem extends Component {
-  render() {
-    const {classes, command, indent = -1, onSelectCommand} = this.props;
+    render() {
+    const {classes, command, indent = -1, onSelectCommand, parent, status} = this.props;
     return ([
       <div className={ classes.item } key={ `command` }>
         { command.label && (
@@ -14,12 +20,12 @@ class TreeItem extends Component {
                   onClick={ () => onSelectCommand(command, command.id || command.label) }
           >
             <span className={ classes.commandLabel }>{ command.label }</span>
-            { !command.children && <span>O X</span> }
+            { !command.children && <StatusLight status={ status[`${parent}*${command.id || command.label}`] }/> }
           </Button>
         ) }
       </div>,
       ...(command.children || []).map((childCommand, idx) => (
-        <TreeItemWithStyles command={ childCommand } key={ `childCommand-${ idx }` } indent={ indent + 1 }
+        <TreeItemWithStyles command={ childCommand } key={ `childCommand-${ idx }` } indent={ indent + 1 } parent={ `${parent ? parent + '*' : ''}${ command.id || command.label }`}
                             onSelectCommand={ (child, idUntilNow) => onSelectCommand(child, `${ command.id || command.label }*${ idUntilNow }`) }
         />
       )),
@@ -27,6 +33,6 @@ class TreeItem extends Component {
   }
 }
 
-const TreeItemWithStyles = withStyles(styles)(TreeItem);
+const TreeItemWithStyles = withStyles(styles)(connect(mapStateToProps)(TreeItem));
 
 export default TreeItemWithStyles;
