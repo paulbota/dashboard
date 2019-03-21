@@ -4,11 +4,6 @@ import Button from '@material-ui/core/Button';
 
 import styles from './TreeItem.styles';
 import StatusLight from '../statusLight/StatusLight';
-import {connect} from 'react-redux';
-
-const mapStateToProps = ({command: {status}}) => ({
-  status
-});
 
 class TreeItem extends Component {
     render() {
@@ -26,13 +21,13 @@ class TreeItem extends Component {
       </div>,
       ...(command.children || []).map((childCommand, idx) => (
         <TreeItemWithStyles command={ childCommand } key={ `childCommand-${ idx }` } indent={ indent + 1 } parent={ `${parent ? parent + '*' : ''}${ command.id || command.label }`}
-                            onSelectCommand={ (child, idUntilNow) => onSelectCommand(child, `${ command.id || command.label }*${ idUntilNow }`) }
+                            onSelectCommand={ (child, idUntilNow) => onSelectCommand(child, `${ command.id || command.label }*${ idUntilNow }`) } status = { status }
         />
       )),
     ]);
   }
 }
 
-const TreeItemWithStyles = withStyles(styles)(connect(mapStateToProps)(TreeItem));
+const TreeItemWithStyles = withStyles(styles)(TreeItem);
 
 export default TreeItemWithStyles;
