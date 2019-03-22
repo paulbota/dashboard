@@ -6,6 +6,7 @@ import StatusTab from './tabs/StatusTab';
 import LogsTab from './tabs/LogsTab';
 import SettingsTab from "./tabs/SettingsTab";
 
+
 class ViewForm extends Component {
   state = {
     value: 0,
